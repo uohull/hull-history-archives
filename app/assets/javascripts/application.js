@@ -20,3 +20,5 @@
 //= require jquery-ui
 //= require blacklight/blacklight
 //= require_tree .
+Blacklight.do_search_context_behaviour = function() { }
+

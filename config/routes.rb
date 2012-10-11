@@ -6,6 +6,9 @@ HullHistoryArchives::Application.routes.draw do
 
   devise_for :users
 
+  resources :generic_contents
+  resources :structural_sets
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

@@ -36,6 +36,7 @@ gem 'jquery-rails'
 
   # For testing with rspec
   group :development, :test do
+  	gem 'debugger'
     gem 'rspec-rails', '>=2.9.0'
     gem 'jettywrapper'
     gem 'database_cleaner'
@@ -58,6 +59,10 @@ gem 'therubyracer'
 
 # To use debugger
 # gem 'debugger'
+
+gem 'active-fedora'
+gem 'om'
+gem 'rubytree'
 
 gem "devise"
 gem "compass-rails", "~> 1.0.0", :group => :assets

@@ -1,0 +1,46 @@
+<%= form_for(@generic_content, :html => { :multipart => true } ) do |f| %>
+  <h2>Generic Content</h2>
+
+  <h3>Title</h3>
+  <div class="row">
+    <%= f.label :title, 'Title' %>
+    <%= f.text_field :title, :value => @generic_content.title, :required => true %>    
+  </div>
+
+
+  <h3>Description</h3>
+  <div class="row">
+    <%= f.label :description %>
+    <%= f.text_area :description, :value => @generic_content.description, :required => true %>
+  </div>
+
+  <h3>Notes</h3>
+
+  <div class="row">
+    <%= f.label :admin_note %>
+    <%= f.text_area :admin_note, :value => @generic_content.admin_note, :required => true %>
+  </div>
+  <div class="row">
+    <%= f.label :additional_notes %>
+    <%= f.text_area :additional_notes, :value => @generic_content.additional_notes, :required => true %>
+  </div>
+
+  <h2>File</h2>
+  <%= file_field_tag "filedata"  %>
+
+  <% if @generic_content.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@generic_content.errors.count, "error") %> prohibited this generic_content from being saved:</h2>
+
+      <ul>
+      <% @generic_content.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

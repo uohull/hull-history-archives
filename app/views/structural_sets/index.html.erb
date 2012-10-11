@@ -1,0 +1,23 @@
+<h1>Listing structural_sets</h1>
+
+<table>
+  <tr>
+    <th></th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @structural_sets.each do |structural_set| %>
+  <tr>
+    <td><%= structural_set.title %></td>
+    <td><%= link_to 'Show', structural_set %></td>
+    <td><%= link_to 'Edit', edit_structural_set_path(structural_set) %></td>
+    <td><%= link_to 'Destroy', structural_set, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Structural set', new_structural_set_path %>

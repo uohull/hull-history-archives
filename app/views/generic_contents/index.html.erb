@@ -1,0 +1,23 @@
+<h1>Listing generic_contents</h1>
+
+<table>
+  <tr>
+    <th></th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @generic_contents.each do |generic_content| %>
+  <tr>
+    <td><%= generic_content.title %></td>
+    <td><%= link_to 'Show', generic_content %></td>
+    <td><%= link_to 'Edit', edit_generic_content_path(generic_content) %></td>
+    <td><%= link_to 'Destroy', generic_content, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Generic content', new_generic_content_path %>

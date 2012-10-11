@@ -1,0 +1,46 @@
+<%= form_for(@structural_set) do |f| %>
+
+  <h2>Structural Set</h2>
+  <h3>Title</h3>
+    <div class="row">
+      <%= f.label :title, 'Title' %>
+      <%= f.text_field :title, :value => @structural_set.title, :required => true %>    
+    </div>
+
+
+    <h3>Description</h3>
+    <div class="row">
+      <%= f.label :description %>
+      <%= f.text_area :description, :value => @structural_set.description, :required => true %>
+    </div>
+
+    <h3>Notes</h3>
+
+    <div class="row">
+      <%= f.label :admin_note %>
+      <%= f.text_area :admin_note, :value => @structural_set.admin_note, :required => true %>
+    </div>
+    <div class="row">
+      <%= f.label :additional_notes %>
+      <%= f.text_area :additional_notes, :value => @structural_set.additional_notes, :required => true %>
+    </div>
+
+
+    <%= select "Structural Set","",  StructuralSet.tree.options_for_nested_select, :selected=>"", :include_blank=>true, :class=>"structural-set-select"  %>
+
+  <% if @structural_set.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@structural_set.errors.count, "error") %> prohibited this structural_set from being saved:</h2>
+
+      <ul>
+      <% @structural_set.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
