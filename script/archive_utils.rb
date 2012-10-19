@@ -17,11 +17,14 @@ class ArchiveUtils
 			unless (name.eql? "." ) || (name.eql? ".." )
 				is_directory = File.directory?("#{directory}/#{name}")
 
+				sub_node = Tree::TreeNode.new(name, DiskAsset.new("#{directory}/#{name}", is_directory, nil))
+				tree_node <<  sub_node
+
+				#If the disk_asset is a directory, walk the tree...
 				if is_directory
-					sub_node = Tree::TreeNode.new(name, DiskAsset.new("#{directory}/#{name}", is_directory, nil))
-					tree_node <<  sub_node				
 					walk_tree("#{directory}/#{name}",  sub_node	  )					
-				end 
+				end
+
 			end
 		end
 

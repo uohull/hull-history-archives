@@ -49,10 +49,19 @@ class GenericContentsController < ApplicationController
     apply_depositor_metadata(@generic_content)
     @generic_content.label = params[:generic_content][:title]
 
+    debugger
     add_posted_blob_to_asset(@generic_content, params[:filedata]) if params.has_key?(:filedata)
 
+    @generic_content.save
+
+    #These need to be done after the save due to use of Fedora generated metadata...
+    @generic_content.update_content_metadata if params.has_key?(:filedata)
+    @generic_content.update_desc_metadata if params.has_key?(:filedata)
+
+    saved = @generic_content.save
+
     respond_to do |format|
-      if @generic_content.save
+      if saved
         format.html { redirect_to @generic_content, notice: 'Generic content was successfully created.' }
         format.json { render json: @generic_content, status: :created, location: @generic_content }
       else

@@ -1,9 +1,11 @@
 class GenericContent < ActiveFedora::Base
-
-  #include Hydra::ModelMixins::CommonMetadata
-  #include Hydra::ModelMethods
+  include Hydra::ModelMixins::CommonMetadata
+  include Hydra::ModelMethods
+  include ArchivedAssetsModelMethods
 
   has_metadata :name => 'descMetadata', :type => ModsGenericContent
+
+  has_metadata :name => 'contentMetadata', :type => ContentMetadata
 
   has_file_datastream :name => 'content', :type => ActiveFedora::Datastream
 
