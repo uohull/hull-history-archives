@@ -17,50 +17,49 @@ col_ref_code = $stdin.gets.chomp
 puts "Enter the archive accession number:"
 acc_no = $stdin.gets.chomp
 
-
 #Tree Builder takes the root director, collection reference number and the accession number
 tree_builder = DiskAssetTreeBuilder.new(root_directory, col_ref_code, acc_no)
 #Builds the tree of directories and files....
-disk_asset_tree = tree_builder.build_tree
+success, disk_asset_tree, resume_deposit = tree_builder.build_tree
 
-#Lets save it to the disk...
-disk_asset_tree.save_to_disk("/opt/Test/")
+#If the tree built correctly... 
+if success 
 
+	if resume_deposit
+		puts "The Archive Deposit tool has detected that an attempt was made to import these objects into Hydra previously"
+		puts ""
+		#Print to screen the list of all assets and associated pids
+		disk_asset_tree.each do |node| 
+			puts "Path: #{node.content.path} | Directory: #{node.content.is_directory} | Fedora PID: #{node.content.fedora_pid} " 
+		end	
 
-disk_asset_tree.print_tree
+		puts "The above is the Disk asset listing along with the associated Fedora persistant identifier"
+		puts "Do you want to continue the import from the last failure? [y/n]"
+	else
+		disk_asset_tree.print_tree
+		puts "Would you like to import this directory tree into Hydra [y/n]? "
+	end
 
-puts "Would you like to import this directory tree into Hydra [y/n]? "
-continue = $stdin.gets.chomp
+	continue = $stdin.gets.chomp
 
-if continue.downcase == "y"
-	HydraUtils.deposit_tree_of_disk_assets(disk_asset_tree)
+	if continue.downcase == "y"
+
+	 	if 	HydraUtils.deposit_tree_of_disk_assets(disk_asset_tree)
+	 		puts "The Hydra archive deposit finished successfully"
+	 		#Status file is deleted
+	 		disk_asset_tree.delete_status_file
+	 	else
+	 		puts "There was an issue depositing the file asset collection."
+	 		puts "To retry this process, restart the application and enter the same Archive directory/Collection reference code/Archive accession number"
+	 	end
+	end
+
+	puts "Would you like to see the File listing and associated Fedora persistant identifier [y/n]? "
+	continue = $stdin.gets.chomp
+
+	if continue.downcase == "y"
+		disk_asset_tree.each do |node| 
+			puts "Path: #{node.content.path} | Directory: #{node.content.is_directory} | Fedora PID: #{node.content.fedora_pid} " 
+		end	
+	end
 end
-
-#@structural_set = StructuralSet.new(params[:structural_set])
-puts "Would you like to see file listing [y/n]? "
-continue = $stdin.gets.chomp
-
-if continue.downcase == "y"
-	disk_asset_tree.each do |node| 
-		puts "Path: #{node.content.path} | Directory: #{node.content.is_directory} | Fedora PID: #{node.content.fedora_pid} " 
-	end	
-end
-
-
-
-def process_folder(folder)
-	
-
-end
-
-def deposit_folder_to_hydra(folder)
-  folder
-end
-
-def deposit_file_to_hydra(file)
-	file
-end
-
-
-
-

@@ -7,76 +7,113 @@ class HydraUtils
 
  		ActiveFedora.init(:fedora_config_path => "../config/fedora.yml")
 
+ 		deposited_tree = true
+
 		if tree_of_disk_assets.is_a? Tree::TreeNode
-			# ..... This is a depth-first and L-to-R pre-ordered traversal.
+
+			puts "Depositing to Hydra"
+
+			# This is a depth-first and L-to-R pre-ordered traversal.
 			tree_of_disk_assets.each do |node| 
+
 				#Lets go through and turn each into a respective Fedora object...
-				deposit_asset(node)
-				#deposit
-				tree_of_disk_assets.save_to_disk("/opt/Test/")
+				if deposit_asset(node)
+					tree_of_disk_assets.save_to_disk
+					print "."
+				else
+					deposited_tree = false
+					break
+				end
 			end
+
+			puts ""
+
 		end
 
-		tree_of_disk_assets
+		return deposited_tree
 	end
  
  	private 
 
  	def self.deposit_asset(disk_asset_node) 
 
+ 		save_success = false
+
  		#puts "Parent node:" +  disk_asset_node.parent.to_s
  		disk_asset = disk_asset_node.content 
 
- 		#Lets get the node's parents object pid (unless it's the root node...)
- 		unless disk_asset_node.is_root? 
- 			parent_disk_asset_node =  disk_asset_node.parent
- 			parent_fedora_pid = parent_disk_asset_node.content.fedora_pid
- 		end
+ 		#If the disk_asset already has a fedora_pid, we shouldn't attempt to ingest! (crucial in deposit resumes)
+ 		if disk_asset.fedora_pid.nil?
+
+	 		#Lets get the node's parents object pid (unless it's the root node...)
+	 		unless disk_asset_node.is_root? 
+	 			parent_disk_asset_node =  disk_asset_node.parent
+	 			parent_fedora_pid = parent_disk_asset_node.content.fedora_pid
+	 		end
 		
- 		if (disk_asset.is_directory)
- 	
- 			set = StructuralSet.new
+	 		if (disk_asset.is_directory)
+	 	
+	 			begin 
+		 			set = StructuralSet.new
 
- 			set.title = disk_asset.asset_name
- 			add_relationship(set, :is_member_of, parent_fedora_pid) unless parent_fedora_pid.nil? 
+		 			set.title = disk_asset.asset_name
+		 			add_relationship(set, :is_member_of, parent_fedora_pid) unless parent_fedora_pid.nil? 
 
- 			#Save the changes...
- 			save_success = set.save
+		 			#Save the changes...
+		 			save_success = set.save
 
- 			if save_success
-	 			disk_asset.fedora_pid =  set.pid
- 			end
+					#True if the object saves correctly...
+		 			if save_success
+		 				disk_asset.fedora_pid =  set.pid
+	 				end
 
- 		else
- 			generic_content = GenericContent.new
+		 		rescue => e
+		 			puts 'There was an issue depositing this asset to the Repository: "#{disk_asset.path}"' 
+		 			puts e.to_s
+		 		end
+	 			
+	 		else
+	 			begin 
+		 			generic_content = GenericContent.new
 
- 			generic_content.title = disk_asset.asset_name
-			f = File.new(disk_asset.path, "r")
+		 			generic_content.title = disk_asset.asset_name
+					f = File.new(disk_asset.path, "r")
 
- 			add_relationship(generic_content, :is_member_of, parent_fedora_pid) unless parent_fedora_pid.nil? 
- 			add_file_ds(generic_content, disk_asset.asset_name, f, "content")
+		 			add_relationship(generic_content, :is_member_of, parent_fedora_pid) unless parent_fedora_pid.nil? 
+		 			add_file_ds(generic_content, disk_asset.asset_name, f, "content")
 
- 			#We need to save the object so that Fedora generates some metadata...
- 			generic_content.save
+		 			#We need to save the object so that Fedora generates some metadata...
+		 			generic_content.save
 
- 			#Add last modified/access dates to object	
- 			mod_date = f.mtime.iso8601
- 			acc_date = f.atime.iso8601
-			mod_date = "" if mod_date.nil? 
-			acc_date = "" if acc_date.nil? 
-			
-			opts = {:last_modified => mod_date, :last_accessed => acc_date}
+		 			#Add last modified/access dates to object	
+		 			mod_date = f.mtime.iso8601
+		 			acc_date = f.atime.iso8601
+					mod_date = "" if mod_date.nil? 
+					acc_date = "" if acc_date.nil? 
+					
+					opts = {:last_modified => mod_date, :last_accessed => acc_date}
 
-			generic_content.update_content_metadata(opts)
-			generic_content.update_desc_metadata
+					generic_content.update_content_metadata(opts)
+					generic_content.update_desc_metadata
 
- 			save_success = generic_content.save
+					#True if the object saves correctly...
+		 			save_success = generic_content.save
 
- 			if save_success
- 				disk_asset.fedora_pid = generic_content.pid
- 			end
+		 			if save_success
+		 				disk_asset.fedora_pid = generic_content.pid
+		 			end
 
- 		end
+		 		rescue => e
+		 			puts "There was an issue depositing this file to the Repository: " << disk_asset.path 
+		 			puts e.to_s
+		 		end
+	 		end
+	 	else
+	 		#We set save success to true (even though it already existed within Fedora...)
+	 		save_success = true
+	 	end
+
+ 		return save_success
  	end
 
  	def self.add_relationship(hydra_asset, relationship, target)

@@ -11,11 +11,40 @@ class DiskAssetTreeBuilder
 	end
 
 	def build_tree
-		root_disk_asset = DiskAsset.new(@directory, true, nil)
-		root_node = DiskAssetTreeNode.new(root_disk_asset.asset_name, root_disk_asset, @collection_reference_code, @accession_number )
-		
-		walk_tree(directory, root_node)
-		root_node
+
+		build_tree = true
+		resume_deposit = false
+
+		#If a tree status file already exists retrieve it...
+		if DiskAssetTreeNode.status_file_exists(local_temporary_directory, @collection_reference_code, @accession_number)
+			#Retrieve and return
+			root_node = DiskAssetTreeNode.load_from_disk(local_temporary_directory, collection_reference_code, accession_number )
+			resume_deposit = true
+		else
+			begin
+				root_disk_asset = DiskAsset.new(@directory, true, nil)
+				root_node = DiskAssetTreeNode.new(root_disk_asset.asset_name, root_disk_asset, @collection_reference_code, @accession_number, local_temporary_directory )
+
+				walk_tree(directory, root_node)			
+
+			rescue => e
+		 		puts "There was an issue building the Disk asset tree."
+		 		build_tree = false
+		 	end
+
+		 	if build_tree
+		 		begin 
+					#Lets save it to the disk...
+					root_node.save_to_disk
+				rescue => e
+					puts "There was an issue saving the status temporary file"
+					puts e.to_s
+					build_tree = false
+				end
+		 	end
+		 end
+
+		return build_tree, root_node, resume_deposit
 	end
 
 
@@ -26,7 +55,7 @@ class DiskAssetTreeBuilder
 				is_directory = File.directory?("#{directory}/#{name}")
 
 				#sub_node = Tree::TreeNode.new(name, DiskAsset.new("#{directory}/#{name}", is_directory, nil), @collection_reference_code, @accession_number )
-				sub_node = DiskAssetTreeNode.new(name, DiskAsset.new("#{directory}/#{name}", is_directory, nil), @collection_reference_code, @accession_number )
+				sub_node = DiskAssetTreeNode.new(name, DiskAsset.new("#{directory}/#{name}", is_directory, nil), @collection_reference_code, @accession_number, local_temporary_directory)
 			
 				tree_node <<  sub_node
 
@@ -37,7 +66,10 @@ class DiskAssetTreeBuilder
 
 			end
 		end
+	end
 
+	def local_temporary_directory
+		"/opt/Test/"
 	end
 
 end
