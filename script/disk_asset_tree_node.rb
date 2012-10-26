@@ -8,7 +8,7 @@ class DiskAssetTreeNode < Tree::TreeNode
 		@collection_reference_code, @accession_number, @local_temporary_directory = collection_reference_code, accession_number, local_temporary_directory
 	
 		unless @local_temporary_directory.nil?
-			@tree_status_file_path =  "#{@local_temporary_directory}/#{@collection_reference_code}-#{@accession_number}"
+			@tree_status_file_path =  "#{@local_temporary_directory}/#{@collection_reference_code}-#{@accession_number}.dat"
 		end
 	end
 
@@ -22,7 +22,7 @@ class DiskAssetTreeNode < Tree::TreeNode
 	
 	def self.load_from_disk(local_temporary_directory, collection_reference_code, accession_number )
 
-		@tree_status_file_path = "#{local_temporary_directory}/#{collection_reference_code}-#{accession_number}"
+		@tree_status_file_path = "#{local_temporary_directory}/#{collection_reference_code}-#{accession_number}.dat"
 	 
 	 	formatted_file_path = format_file_path(@tree_status_file_path)
 
@@ -44,7 +44,7 @@ class DiskAssetTreeNode < Tree::TreeNode
 	end
 
 	def self.status_file_exists(local_temporary_directory, collection_reference_code, accession_number)
-		tree_status_file_path =  "#{local_temporary_directory}/#{collection_reference_code}-#{accession_number}"
+		tree_status_file_path =  "#{local_temporary_directory}/#{collection_reference_code}-#{accession_number}.dat"
 		File.exist?(tree_status_file_path)
 	end
 

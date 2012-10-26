@@ -1,5 +1,7 @@
 require "#{File.dirname(__FILE__)}/disk_asset"
 require 'ruby-debug'
+require 'open3'
+require 'time'
 
 class HydraUtils
 	
@@ -84,14 +86,12 @@ class HydraUtils
 
 		 			#We need to save the object so that Fedora generates some metadata...
 		 			generic_content.save
-
-		 			#Add last modified/access dates to object	
-		 			mod_date = f.mtime.iso8601
-		 			acc_date = f.atime.iso8601
-					mod_date = "" if mod_date.nil? 
-					acc_date = "" if acc_date.nil? 
+		
+		 			mod_date = f.mtime.iso8601.nil? ? "" : f.mtime.iso8601
+		 			acc_date = f.atime.iso8601.nil? ? "" : f.atime.iso8601
+		 			created_date = f.ctime.iso8601.nil? ? "" : f.ctime.iso8601
 					
-					opts = {:last_modified => mod_date, :last_accessed => acc_date}
+					opts = {:date_last_modified => mod_date, :date_last_accessed => acc_date, :date_created => created_date }
 
 					generic_content.update_content_metadata(opts)
 					generic_content.update_desc_metadata

@@ -16,8 +16,9 @@ class ContentMetadata < ActiveFedora::NokogiriDatastream
         t.mime_type(:path=>{:attribute=>"mimeType"})
         t.size(:path=>{:attribute=>"size"})
         t.location
-        t.last_modified(:path=>{:attribute=>"lastModified"})
-        t.last_accessed(:path=>{:attribute=>"lastAccessed"})
+        t.date_created(:path=>{:attribute=>"dateCreated"})
+        t.date_last_modified(:path=>{:attribute=>"dateLastModified"})
+        t.date_last_accessed(:path=>{:attribute=>"dateLastAccessed"})
         t.checksum {
           t.type(:path=>{:attribute=>"type"})
         }              
@@ -53,13 +54,13 @@ class ContentMetadata < ActiveFedora::NokogiriDatastream
     # @option opts [String] :ds_id the dsID for the datastream
     def self.resource_template(opts={})
       options = {:sequence=>"",:id=>"",:display_label=>"",:object_id=>"",:file_id=>"content",:file_size=>"",:url=>"", :ds_id=>'content', 
-        :last_modified => "", :last_accessed =>"", :checksum => "", :checksum_type => "" }
+        :date_last_modified => "", :date_last_accessed =>"", :date_created => "", :checksum => "", :checksum_type => "" }
       options.merge!(opts)
       #options.merge!({:id=>"Asset #{options[:display_label]}"})
       builder = Nokogiri::XML::Builder.new do |xml|
         xml.resource(:sequence=>options[:sequence],:id=>options[:ds_id],:contains=>"content", :displayLabel=>options[:display_label],:objectID=>options[:object_id],:serviceDef=>options[:service_def], :dsID=>options[:ds_id],:serviceMethod=>options[:service_method]) {
           xml.file(:id=>options[:id], :format=>options[:format], :mimeType=>options[:mime_type], :size=>options[:file_size], 
-            :lastModified=>options[:last_modified], :lastAccessed=>options[:last_modified]) {
+            :dateCreated=>options[:date_created], :dateLastModified=>options[:date_last_modified], :dateLastAccessed=>options[:date_last_modified] ) {
             xml.checksum(options[:checksum], :type=>options[:checksum_type])            
             xml.location(options[:url], :type=>"url")
           }
